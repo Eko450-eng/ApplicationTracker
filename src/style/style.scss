@@ -1,0 +1,36 @@
+@import 'colros';
+
+@mixin flex($fd: column, $jc: center, $ai: center ){
+  display: flex;
+  flex-direction: $fd;
+  justify-content: $jc;
+  align-items: $ai;
+}
+
+@mixin grid($ca:2, $cs:1fr, $ra:3, $rs: 1fr, $ac: center, $jc: center, $ji: center ){
+  display: grid;
+  grid-template-columns: repeat($ca, $cs);
+  grid-template-rows: repeat($ra, $rs);
+  align-content: $ac;
+  justify-content: $jc;
+  justify-items: $ji;
+}
+
+.App{
+  background: $nord0;
+  width: 100vw;
+  height: 100vh;
+  color: $nord4;
+}
+
+.Add{
+  @include flex();
+  margin: 0 auto;
+  width: 60%;
+}
+
+body{
+  max-width: 85%;
+  max-height: 100vh;
+  overflow-y: hidden;
+}
