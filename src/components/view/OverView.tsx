@@ -1,9 +1,10 @@
 import { collection, onSnapshot, query } from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { db } from "../../firebase"
+import { hiddenState } from "../interfaces"
 import { TableView } from "./TableView"
 
-function View() {
+function OverView({ hidden }: hiddenState) {
 	const [data, setData] = useState<any>([])
 	const q = query(collection(db, "applications"));
 
@@ -23,16 +24,8 @@ function View() {
 		getData()
 	},[])
 
-	const mockData = [
-		{
-			"name": "Athena Weissnat",
-			"company": "Little - Rippin",
-			"email": "Elouise.Prohaska@yahoo.com"
-		}
-	]
-
-	return <div className="View">
-		<TableView data={data} />
+	return <div className="OverView">
+		<TableView data={data} hidden={hidden} />
 	</div>
 }
-export default View
+export default OverView

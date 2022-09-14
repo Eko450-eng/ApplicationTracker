@@ -1,6 +1,6 @@
 import { createStyles } from '@mantine/core';
 
-export const formStyle = createStyles((theme) => ({
+export const formComponentsStyle = createStyles((theme) => ({
 	root: {
 		position: 'relative',
 	},

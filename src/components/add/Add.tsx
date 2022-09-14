@@ -1,79 +1,28 @@
-import { Button, Checkbox, createStyles, Menu, NativeSelect, TextInput } from "@mantine/core";
+import { Button, Checkbox, FileButton, Menu, NativeSelect, TextInput } from "@mantine/core";
 import { useForm } from '@mantine/form'
 import { DatePicker } from "@mantine/dates";
-import { doc, setDoc, getFirestore, serverTimestamp, Timestamp } from "firebase/firestore";
-import { app } from '../../firebase'
-import { formStyle } from '../formComponents/FormComponents'
-import { initialValues } from './interfaces'
-import { read, utils, writeFile } from 'xlsx';
+import { defaultValue, initialValues } from '../interfaces'
+import { addCompany, upload } from "./addLogic";
+import { formComponentsStyle } from "../../style/formComponentsStyle";
+import { useNavigate } from "react-router-dom";
 
-const db = getFirestore(app)
 function Add() {
-
-	const { classes } = formStyle()
-
-	const addForm = useForm({
-		initialValues: {
-			id: "0",
-			company: "",
-			applied: Timestamp.now(),
-			role: "",
-			declined: false,
-			invited: Timestamp.now(),
-			platform: "LinkedIn",
-			reason: "",
-			interview: "",
-			notes: "",
-			location: ""
+	const { classes } = formComponentsStyle()
+	const navigate = useNavigate()
+	const addForm = useForm(defaultValue)
+	const handleSubmit = (v: initialValues) => {
+		try {
+			addCompany(v)
+			addForm.reset()
+			navigate('/')
+		}catch(e){
+			console.log(e)
 		}
-	})
-
-	const addCompany = async (values: initialValues) => {
-		console.log(values.applied)
-		console.log( typeof(values.applied) )
-		await setDoc(doc(db, "applications", `${values.company}`), {
-			id: "1",
-			company: values.company,
-			applied: values.applied,
-			role: values.role,
-			declined: values.declined,
-			invited: values.invited,
-			platform: values.platform,
-			reason: values.reason,
-			interview: values.interview,
-			notes: values.notes,
-			location: values.location
-		});
-		addForm.reset()
-	}
-
-	const upload = async (e: any) => {
-		const file = e.target.files[0]
-		const data = await file.arrayBuffer()
-		const workbook = read(data)
-		const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-
-		const jsonData = utils.sheet_to_json(worksheet)
-		console.log(jsonData)
-
-		jsonData.forEach((i: any) => {
-			if (i.declined  === "x") i.declined = true
-			if (i.invited == undefined) i.invited = serverTimestamp()
-			if (i.reason == undefined) i.reason = ""
-			if (i.interview == undefined) i.interview = ""
-			if (i.notes == undefined) i.notes = ""
-			if (i.platform == undefined) i.platform = "LinkedIn"
-			if (i.location == undefined) i.location = "BaWü"
-			i.declined = false
-			addCompany(i)
-		})
-
 	}
 
 	return (
 		<div className="Add">
-			<input type="file" name="Excel file" onChange={(e) => upload(e)} />
-			<form onSubmit={addForm.onSubmit((v) => addCompany(v))}>
+			<form onSubmit={addForm.onSubmit((v) => handleSubmit(v))}>
 				<TextInput
 					style={{ marginTop: 20 }}
 					label="Company name"
@@ -84,9 +33,9 @@ function Add() {
 
 				<DatePicker
 					{...addForm.getInputProps('applied')}
-					style={{ marginTop: 20 }}
 					label="Applied"
 					placeholder="When did you apply?"
+					style={{ marginTop: 20 }}
 					classNames={classes}
 					clearable={true}
 				/>
@@ -180,6 +129,10 @@ function Add() {
 					<Button type="submit">Save</Button>
 				</div>
 			</form>
+			<FileButton onChange={(e) => upload(e)} accept="xlsx">
+				{(props) => <Button style={{ marginTop: 20 }} {...props}>Upload XLSX</Button>}
+			</FileButton>
+
 		</div>
 	)
 

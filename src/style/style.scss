@@ -1,4 +1,4 @@
-@import 'colros';
+@import 'colors';
 
 @mixin flex($fd: column, $jc: center, $ai: center ){
   display: flex;
@@ -16,7 +16,7 @@
   justify-items: $ji;
 }
 
-.App{
+.App, body{
   background: $nord0;
   width: 100vw;
   height: 100vh;
@@ -34,3 +34,10 @@ body{
   max-height: 100vh;
   overflow-y: hidden;
 }
+
+.Navigation{
+  @include flex($fd:row);
+  width: 95%;
+  margin: 0 auto;
+}
+
