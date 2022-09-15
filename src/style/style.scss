@@ -23,7 +23,10 @@
   color: $nord4;
 }
 
-.Add{
+.form{
+  h2{
+    text-align: center;
+  }
   @include flex();
   margin: 0 auto;
   width: 60%;
@@ -41,3 +44,11 @@ body{
   margin: 0 auto;
 }
 
+.mantine-PasswordInput-label{
+  color:white !important;
+}
+
+.button_wrapper{
+  margin: 20px auto;
+  @include flex($fd: row, $jc:space-between)
+}

@@ -4,6 +4,23 @@ export interface hiddenState {
 	hidden: boolean
 }
 
+export interface RolesData {
+	value: string,
+	label: string,
+}
+
+export interface registerForm {
+	id: string,
+	email: string,
+	password: string,
+	passwordConfirm: string,
+}
+
+export interface loginForm {
+	email: "",
+	password: "",
+}
+
 export interface initialValues {
 	id: string,
 	company?: string,
@@ -11,22 +28,25 @@ export interface initialValues {
 	role?: string,
 	declined?: boolean,
 	accepted?: boolean,
-	invited: Timestamp,
-	platform?: string,
-	reason?: string,
-	interview?: string,
-	notes?: string,
-	location?: string
+	additional: {
+		invited: Timestamp,
+		platform?: string,
+		reason?: string,
+		interview?: string,
+		notes?: string,
+		location?: string
+	}
 }
 
 export const defaultValue = {
-		initialValues: {
-			id: "0",
-			company: "",
-			applied: Timestamp.now(),
-			role: "",
-			declined: false,
-			accepted: false,
+	initialValues: {
+		id: "0",
+		company: "",
+		applied: Timestamp.now(),
+		role: "",
+		declined: false,
+		accepted: false,
+		additional: {
 			invited: Timestamp.now(),
 			platform: "LinkedIn",
 			reason: "",
@@ -34,4 +54,25 @@ export const defaultValue = {
 			notes: "",
 			location: ""
 		}
+	}
+}
+
+export const registerFormIV = {
+	initialValues: {
+		id: "",
+		email: "",
+		password: "",
+		passwordConfirm: "",
+	}
+}
+
+export const loginFormIV = {
+	initialValues: {
+		email: "",
+		password: "",
+	}
+}
+
+export interface SettingsContextProps {
+	bulkEntries?: boolean
 }

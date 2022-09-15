@@ -1,20 +1,49 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './style/style.scss';
 import Add from './components/add/Add'
 import OverView from './components/view/OverView';
 import Navigation from './components/buttons/Navigation';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { AppShell, MantineProvider } from '@mantine/core';
+import { MantineProvider } from '@mantine/core';
+import Login from './components/login/Login';
+import Register from './components/register/Register';
+import { UserContext, UserContextProps, UserProvider, useUserContext } from './contexts/userContexts/UserContext';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from './firebase';
 
 function App() {
 	const [hidden, setHidden] = useState(true)
+	const auth = getAuth()
+	const [user, setUser] = useState<UserContextProps>({})
+
+	const getSettings = () => {
+		if (!user.user) return
+		const s = doc(db, `users/${user.user.email}/`)
+		onSnapshot(s, (setting) => {
+			const settingsValue = setting.data()
+			if(settingsValue) setHidden(settingsValue.hidden)
+		})
+	}
+
+	useEffect(() => {
+		getSettings()
+	}, [user])
 
 	const setHiddenState = (v: boolean) => {
 		setHidden(v)
 	}
 
+	useEffect(() => {
+		onAuthStateChanged(auth, (user) => {
+			if (!user) return
+			setUser({ user: user })
+		})
+	}, [])
+
 	return (
-			<BrowserRouter>
+		<BrowserRouter>
+			<UserContext.Provider value={user}>
 				<MantineProvider theme={{
 					colors: {
 						gray: ["#F0F2F4", "#D5D9E1", "#BBC1CE", "#A0A9BB", "#8591A8", "#6B7994", "#556077", "#404859", "#2B303B", "#15181E"],
@@ -32,12 +61,15 @@ function App() {
 					<div className="App">
 						<Navigation setHiddenState={(v: boolean) => setHiddenState(v)} hidden={hidden} />
 						<Routes>
-							<Route path="/" element={<OverView hidden={hidden} />} />
+							<Route path="/" element={<Login />} />
+							<Route path="register" element={<Register />} />
+							<Route path="overview" element={<OverView hidden={hidden} />} />
 							<Route path="add" element={<Add />} />
 						</Routes>
 					</div>
 				</MantineProvider>
-			</BrowserRouter>
+			</UserContext.Provider>
+		</BrowserRouter>
 	);
 }
 

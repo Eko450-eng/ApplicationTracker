@@ -1,48 +1,44 @@
 import { db } from "../../firebase";
-import { doc, setDoc } from "firebase/firestore";
-import { read, utils } from 'xlsx';
-import { serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { initialValues } from "../interfaces";
 import { v4 as uuid } from 'uuid'
+import { User } from "firebase/auth";
 
-export const addCompany = async (values: initialValues) => {
-	await setDoc(doc(db, "applications", `${values.company}`), {
+export const addCompany = async (user: User, values: initialValues) => {
+	if (!user) return
+	const userMail = user.email
+
+	const data = {
 		id: uuid(),
 		company: values.company,
 		applied: values.applied,
 		role: values.role,
 		declined: values.declined,
-		invited: values.invited,
-		platform: values.platform,
-		reason: values.reason,
-		interview: values.interview,
-		notes: values.notes,
-		location: values.location
-	});
+		accepted: values.accepted,
+		additional: {
+			invited: values.additional.invited,
+			platform: values.additional.platform,
+			reason: values.additional.reason,
+			interview: values.additional.interview,
+			notes: values.additional.notes,
+			location: values.additional.location
+		}
+	}
+
+	await addDoc(collection(db, "users", `${userMail}`, "companys"), data)
+		.then((doc) => {
+			if (!doc) return
+			setDoc(doc, { id: doc.id }, { merge: true })
+		})
 }
-
-// Exporting data from xlsx file
-// Populating missing fields
-
-export const upload = async (e: any) => {
-	const file = e.target.files[0]
-	const data = await file.arrayBuffer()
-	const workbook = read(data)
-	const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-
-	const jsonData = utils.sheet_to_json(worksheet)
-	console.log(jsonData)
-
-	jsonData.forEach((i: any) => {
-		if (i.declined  === "x") i.declined = true
-		if (i.invited == undefined) i.invited = serverTimestamp()
-		if (i.reason == undefined) i.reason = ""
-		if (i.interview == undefined) i.interview = ""
-		if (i.notes == undefined) i.notes = ""
-		if (i.platform == undefined) i.platform = "LinkedIn"
-		if (i.location == undefined) i.location = "BaWü"
-		i.declined = false
-		addCompany(i)
-	})
-
+export const setSettings = async(user: User, data: boolean, setting: string) => {
+	const d = doc(db, "users", `${user.email}`)
+	switch(setting){
+		case "bulkEntries":
+			setDoc(d, { bulkEntries: data }, { merge: true })
+			return
+		case "hidden":
+			setDoc(d, { hidden: data }, { merge: true })
+			return
+	}
 }

@@ -1,89 +1,77 @@
-import { Table, Checkbox, ScrollArea, ActionIcon } from '@mantine/core';
+import { Table, Checkbox, ScrollArea, ActionIcon, TextInput, Button } from '@mantine/core';
 import { tableViewStyle } from '../../style/tableView';
 import { initialValues } from '../interfaces';
 import { handleDelete, setStatus } from './tableViewLogic';
 import { Check, X } from 'tabler-icons-react'
-import { Timestamp } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
-
-export function TableView({ data, hidden }: any) {
-	const { classes } = tableViewStyle();
-	const [big, setBig] = useState<boolean>(false)
-
-	const handleResize = ()=> {
-		console.log(window.innerWidth)
-		if(window.innerWidth < 872) setBig(false)
-		if(window.innerWidth > 872) setBig(true)
-	}
-
-	useEffect(()=>{
-		handleResize()
-	}, [])
-
-	window.addEventListener('resize', handleResize);
+import { DocumentData, Timestamp } from 'firebase/firestore';
+import { User } from 'firebase/auth';
+import { ReactNode, useEffect, useState } from 'react';
+import SortedRows from './SortedRows';
+import Titles from './Titles';
 
 
-	const rows = data.map((item: initialValues, i: any) => {
-		const applied = `${item.applied.toDate().getDay()}.${item.applied.toDate().getMonth()}.${item.applied.toDate().getFullYear()}`
-		let invited = ""
-		if (invited !== "") invited = `${item.invited.toDate().getDay()}.${item.invited.toDate().getMonth()}.${item.invited.toDate().getFullYear()}`
-		if (hidden && item.declined) return null
-		const now = Timestamp.now().toDate()
-		const dateApplied = item.applied.toDate()
-		const dayDiff: boolean = (now.getMonth() - dateApplied.getMonth()) >= 1
 
-		return (
-			<tr
-				key={item.company + i}
-				className={classes.rowSelected}
-				style={{ background: dayDiff ? "purple" : "" }}
-			>
-				<td>
-					<Checkbox
-						checked={item.declined}
-						onChange={() => setStatus("declined", item.company, !item.declined)}
-						transitionDuration={0}
-					/>
-				</td>
-				<td>
-					<Checkbox
-						checked={item.accepted}
-						onChange={() => setStatus("accepted", item.company, !item.accepted)}
-						transitionDuration={0}
-					/>
-				</td>
-				<td>{item.company}</td>
-				<td>{applied}</td>
-				<td>{item.role}</td>
-				<td>{invited}</td>
-				<td>{item.location}</td>
-				<td>{item.platform}</td>
-				<td>{item.reason}</td>
-				<td>{item.interview}</td>
-				<td> <ActionIcon onClick={() => handleDelete(item.company)} > <X size={18} /> </ActionIcon> </td>
-			</tr>
-		);
-	});
+export function TableView({ user, data, hidden }: { user: User, data: Array<initialValues | DocumentData>, hidden: boolean }) {
+	const [sortParameter, setSortParameter] = useState<string>('')
+	const [direction, setDirection] = useState<boolean>(false)
+	const [finalData, setFinalData] = useState<any>()
+
+	const changeParameter = (v: string) => setSortParameter(v)
+	const changeDirection = (v: boolean) => setDirection(v)
+
+	// Make reversee sorting
+	// Fix the bug that when one row is already sorted you cant sort to another row
+	// I'm done for today you got this tomorrow bro
 
 	return (
 		<ScrollArea.Autosize maxHeight={"90vh"} mx="auto">
 			<Table className="tableView" verticalSpacing="sm">
 				<thead>
 					<tr>
-						<th style={{ color: "red" }}><X /></th>
-						<th style={{ color: "green" }}><Check /></th>
-						<th style={{ color: "white" }}>Company</th>
-						<th style={{ color: "white" }}>Applied</th>
-						<th style={{ color: "white" }}>Role</th>
-						<th style={{ color: "white" }}>invited</th>
-						<th style={{ color: "white" }}>Location</th>
-						<th style={{ color: "white" }}>platform</th>
-						<th style={{ color: "white" }}>reason</th>
-						<th style={{ color: "white" }}>interview</th>
+						<Titles title={<X />} parameter="declined" direction={(v:boolean)=> changeDirection(v) } sort={(v: string) => changeParameter(v)} textColor="red" />
+
+						<th onClick={
+							() => setSortParameter("company")
+						}
+							style={{ color: "white" }}>Company</th>
+						<th onClick={
+							() => setSortParameter("applied")
+						}
+							style={{ color: "white" }}>Applied</th>
+						<th onClick={
+							() => setSortParameter("role")
+						}
+							style={{ color: "white" }}>Role</th>
+						<th onClick={
+							() => setSortParameter("invited")
+						}
+							style={{ color: "white" }}>invited</th>
+						<th onClick={
+							() => setSortParameter("location")
+						}
+							style={{ color: "white" }}>Location</th>
+						<th onClick={
+							() => setSortParameter("plattform")
+						}
+							style={{ color: "white" }}>platform</th>
+						<th onClick={
+							() => setSortParameter("reason")
+						}
+							style={{ color: "white" }}>reason</th>
+						<th onClick={
+							() => setSortParameter("interview")
+						}
+							style={{ color: "white" }}>interview</th>
+
 						<th style={{ color: "white" }}>Delete</th>
 					</tr>
 				</thead>
-				<tbody>{rows}</tbody>
+				{/* <tbody>{SortedRows(user, data, hidden, sortParameter)}</tbody> */}
+				<tbody>{
+					data.map((item: initialValues | DocumentData, i: any) => {
+						return <SortedRows direction={direction} key={item.company + i} item={item} user={user} data={data} hidden={hidden} sortParameter={sortParameter} />
+					})
+				}</tbody>
 			</Table>
 		</ScrollArea.Autosize>
 	);

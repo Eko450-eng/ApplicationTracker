@@ -1,31 +1,42 @@
-import { collection, onSnapshot, query } from "firebase/firestore"
+import { useUserContext } from "../../contexts/userContexts/UserContext"
 import { useEffect, useState } from "react"
-import { db } from "../../firebase"
-import { hiddenState } from "../interfaces"
+import { hiddenState, initialValues } from "../interfaces"
 import { TableView } from "./TableView"
+import { useNavigate } from "react-router-dom"
+import { User } from "firebase/auth"
+import { collection, DocumentData, onSnapshot, query } from "firebase/firestore"
+import { db } from "src/firebase"
 
 function OverView({ hidden }: hiddenState) {
-	const [data, setData] = useState<any>([])
-	const q = query(collection(db, "applications"));
+	const [data, setData] = useState<Array<initialValues | DocumentData>>([])
+	const user = useUserContext().user
+	const navigate = useNavigate()
 
-	const getData = () => {
-		const unsubscribe = onSnapshot(q, (querySnapshot) => {
+	useEffect(() => {
+		if (!user) navigate('/')
+	}, [])
+
+	const getData = (user: User | undefined) => {
+		if (!user) return
+		const q = query(collection(db, `users/${user.email}/companys`));
+		onSnapshot(q, (querySnapshot) => {
 			setData([])
-			const docs: Array<Object> = []
+			const docs: Array<initialValues | DocumentData> = []
 
 			querySnapshot.forEach((doc) => {
-				docs.push(doc.data())
+				const d: initialValues | DocumentData = { ...doc.data() }
+				docs.push(d)
 			});
-			setData(docs);
+			setData(docs)
 		});
 	}
 
 	useEffect(() => {
-		getData()
-	},[])
+		getData(user)
+	}, [user])
 
 	return <div className="OverView">
-		<TableView data={data} hidden={hidden} />
+		<TableView user={user!} data={data} hidden={hidden} />
 	</div>
 }
 export default OverView
