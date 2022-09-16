@@ -1,24 +1,30 @@
-import { ReactNode, useState } from "react"
+import { ReactNode } from "react"
+import { FilterList } from '@mui/icons-material';
+import { Icon } from '@mui/material';
 
-const Titles = (p: { direction: any, title: string | ReactNode, parameter: string, sort: any, textColor?: string }) => {
-	if (!p.textColor) p.textColor = "white"
-	const [reversed, setReversed] = useState(false)
-	const [clicked, setClicked] = useState(false)
+const Titles = (p: { setCurrent: any, current: any, direction: any, title: string | ReactNode, parameter: string, textColor?: string }) => {
+	const textColor = p.textColor ? p.textColor : "white"
 
+	console.log(p.current)
 	return (
 		<th
 			onClick={() => {
-				p.sort(p.parameter)
-				p.direction(reversed)
-				if (reversed) {
-					setReversed(false)
-				} else {
-					setReversed(true)
-				}
-
-
+				p.setCurrent(p.parameter)
+				p.direction(!p.current)
 			}}
-			style={{ color: p.textColor }}>{p.title}</th>
+		style={{
+			position:"relative",
+			color: textColor,
+		}}>
+			{p.title}
+		<span><FilterList
+				style={{
+					transform:`translateY(-50%) ${ p.current  ? "rotate(180deg)" : "rotate(0deg)" } scale(0.7)`,
+					position:"absolute",
+					top:"50%",
+				}}
+			/></span>
+		</th>
 	)
 }
 

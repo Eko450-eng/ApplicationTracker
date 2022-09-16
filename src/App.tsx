@@ -13,8 +13,8 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from './firebase';
 
 function App() {
-	const [hidden, setHidden] = useState(true)
 	const auth = getAuth()
+	const [hidden, setHidden] = useState(true)
 	const [user, setUser] = useState<UserContextProps>({})
 
 	const getSettings = () => {

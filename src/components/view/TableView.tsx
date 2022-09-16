@@ -1,75 +1,46 @@
-import { Table, Checkbox, ScrollArea, ActionIcon, TextInput, Button } from '@mantine/core';
-import { tableViewStyle } from '../../style/tableView';
+import { Table, ScrollArea } from '@mantine/core';
 import { initialValues } from '../interfaces';
-import { handleDelete, setStatus } from './tableViewLogic';
 import { Check, X } from 'tabler-icons-react'
-import { DocumentData, Timestamp } from 'firebase/firestore';
+import { DocumentData } from 'firebase/firestore';
 import { User } from 'firebase/auth';
-import { ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import SortedRows from './SortedRows';
 import Titles from './Titles';
 
 
 
-export function TableView({ user, data, hidden }: { user: User, data: Array<initialValues | DocumentData>, hidden: boolean }) {
-	const [sortParameter, setSortParameter] = useState<string>('')
+export function TableView(p: { currentDirection: boolean, user:User, data: Array<initialValues | DocumentData>, hidden: boolean, sortValue: any, sortDirection: any }) {
 	const [direction, setDirection] = useState<boolean>(false)
-	const [finalData, setFinalData] = useState<any>()
+	const [current, setCurrent] = useState<string>("company")
 
-	const changeParameter = (v: string) => setSortParameter(v)
 	const changeDirection = (v: boolean) => setDirection(v)
 
-	// Make reversee sorting
-	// Fix the bug that when one row is already sorted you cant sort to another row
-	// I'm done for today you got this tomorrow bro
+	useEffect(() => {
+		p.sortValue(current)
+	}, [current])
 
 	return (
 		<ScrollArea.Autosize maxHeight={"90vh"} mx="auto">
 			<Table className="tableView" verticalSpacing="sm">
 				<thead>
 					<tr>
-						<Titles title={<X />} parameter="declined" direction={(v:boolean)=> changeDirection(v) } sort={(v: string) => changeParameter(v)} textColor="red" />
-
-						<th onClick={
-							() => setSortParameter("company")
-						}
-							style={{ color: "white" }}>Company</th>
-						<th onClick={
-							() => setSortParameter("applied")
-						}
-							style={{ color: "white" }}>Applied</th>
-						<th onClick={
-							() => setSortParameter("role")
-						}
-							style={{ color: "white" }}>Role</th>
-						<th onClick={
-							() => setSortParameter("invited")
-						}
-							style={{ color: "white" }}>invited</th>
-						<th onClick={
-							() => setSortParameter("location")
-						}
-							style={{ color: "white" }}>Location</th>
-						<th onClick={
-							() => setSortParameter("plattform")
-						}
-							style={{ color: "white" }}>platform</th>
-						<th onClick={
-							() => setSortParameter("reason")
-						}
-							style={{ color: "white" }}>reason</th>
-						<th onClick={
-							() => setSortParameter("interview")
-						}
-							style={{ color: "white" }}>interview</th>
+						<Titles setCurrent={(v: string) => setCurrent("declined")} current={p.currentDirection} title={<X />} parameter="declined" direction={(v: boolean) => p.sortDirection(v)}  textColor="red" />
+						<Titles setCurrent={(v: string) => setCurrent("accepted")} current={p.currentDirection} title={<Check />} parameter="accepted" direction={(v: boolean) => p.sortDirection(v)}  textColor="green" />
+						<Titles setCurrent={(v: string) => setCurrent("company")} current={p.currentDirection} title={"Company"} parameter="company" direction={(v: boolean) => p.sortDirection(v)}  />
+						<Titles setCurrent={(v: string) => setCurrent("applied")} current={p.currentDirection} title={"Applied"} parameter="applied" direction={(v: boolean) => p.sortDirection(v)}  />
+						<Titles setCurrent={(v: string) => setCurrent("role")} current={p.currentDirection} title={"Role"} parameter="role" direction={(v: boolean) => p.sortDirection(v)}  />
+						<Titles setCurrent={(v: string) => setCurrent("invited")} current={p.currentDirection} title={"Invited"} parameter="invited" direction={(v: boolean) => p.sortDirection(v)}  />
+						<Titles setCurrent={(v: string) => setCurrent("location")} current={p.currentDirection} title={"Location"} parameter="location" direction={(v: boolean) => p.sortDirection(v)}  />
+						<Titles setCurrent={(v: string) => setCurrent("plattform")} current={p.currentDirection} title={"Plattform"} parameter="plattform" direction={(v: boolean) => p.sortDirection(v)}  />
+						<Titles setCurrent={(v: string) => setCurrent("reason")} current={p.currentDirection} title={"Reason"} parameter="reason" direction={(v: boolean) => p.sortDirection(v)}  />
+						<Titles setCurrent={(v: string) => setCurrent("interview")} current={p.currentDirection} title={"Interview"} parameter="interview" direction={(v: boolean) => p.sortDirection(v)}  />
 
 						<th style={{ color: "white" }}>Delete</th>
 					</tr>
 				</thead>
-				{/* <tbody>{SortedRows(user, data, hidden, sortParameter)}</tbody> */}
 				<tbody>{
-					data.map((item: initialValues | DocumentData, i: any) => {
-						return <SortedRows direction={direction} key={item.company + i} item={item} user={user} data={data} hidden={hidden} sortParameter={sortParameter} />
+					p.data.map((item: initialValues | DocumentData, i: any) => {
+						return <SortedRows key={item.company + i} item={item} user={p.user} data={p.data} hidden={p.hidden} />
 					})
 				}</tbody>
 			</Table>

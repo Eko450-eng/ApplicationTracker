@@ -6,46 +6,8 @@ import { X } from "tabler-icons-react";
 import { initialValues } from "../interfaces"
 import { handleDelete, setStatus } from "./tableViewLogic";
 
-function SortedRows(p: { direction: boolean, item: any, user: User, data: Array<initialValues | DocumentData>, hidden: boolean, sortParameter: string }) {
+function SortedRows(p: { item: any, user: User, data: Array<initialValues | DocumentData>, hidden: boolean }) {
 	const { classes } = tableViewStyle();
-	let data = p.data
-
-	data = data.sort((a: initialValues | DocumentData, b: initialValues | DocumentData) => {
-		switch (p.sortParameter) {
-			case "company":
-				if (a.company > b.company) return 1
-				return -1
-			case "applied":
-				if (a.applied > b.applied) return 1
-				return -1
-			case "role":
-				if (a.role > b.role) return 1
-				return -1
-			case "declined":
-				if (a.declined) return 1
-				return -1
-			case "accepted":
-				if (a.accepted) return 1
-				return -1
-			case "location":
-				if (a.additional.location > b.additional.location) return 1
-				return -1
-			case "plattform":
-				if (a.additional.invited > b.additional.invited) return 1
-				return -1
-			case "interview":
-				if (a.additional.interview > b.additional.interview) return 1
-				return -1
-			case "reason":
-				if (a.additional.reason > b.additional.reason) return 1
-				return -1
-			case "invited":
-				if (a.additional.invited > b.additional.invited) return 1
-				return -1
-			default:
-				return 1
-		}
-	})
 
 	let invited = ""
 	if (invited !== "") invited = `${p.item.additional.invited.toDate().getDay()}.${p.item.additional.invited.toDate().getMonth()}.${p.item.additional.invited.toDate().getFullYear()}`
