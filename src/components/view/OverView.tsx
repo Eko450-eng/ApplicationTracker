@@ -35,7 +35,6 @@ function OverView({ hidden }: hiddenState) {
 	}
 
 	useEffect(() => {
-		console.log(sortValue, sortDirection)
 		getData(user)
 	}, [user, sortValue, sortDirection])
 

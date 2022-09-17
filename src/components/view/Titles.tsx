@@ -5,7 +5,6 @@ import { Icon } from '@mui/material';
 const Titles = (p: { setCurrent: any, current: any, direction: any, title: string | ReactNode, parameter: string, textColor?: string }) => {
 	const textColor = p.textColor ? p.textColor : "white"
 
-	console.log(p.current)
 	return (
 		<th
 			onClick={() => {
